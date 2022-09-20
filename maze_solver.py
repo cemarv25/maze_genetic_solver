@@ -115,15 +115,22 @@ def print_maze_solution(maze: Maze, solution):
         print('')
 
 
-def generate_solution(maze: Maze, intersections, individual, track_intersection_count=False):
+def generate_solution(maze: Maze, intersections, individual, track_intersection_count=False, start_from=None):
+    if not start_from:
+        start_from = maze.start
+
     path = []
     intersection_count = 0
-    x, y = maze.start
+    x, y = start_from
 
     if x == 0:
         x += 1
-    else:
+    elif x == len(maze.grid[0]) - 1:
+        x -= 1
+    elif y == 0:
         y += 1
+    else:
+        y -= 1
 
     path.append((x, y))
 
@@ -131,10 +138,11 @@ def generate_solution(maze: Maze, intersections, individual, track_intersection_
         if (x, y) in intersections:
             decision_idx = intersections.index((x, y))
             x, y = move((x, y), individual[decision_idx])
-            path.append((x, y))
             
-            if track_intersection_count and (x <= 0 or x >= len(maze.grid) - 1 or y <= 0 or y >= len(maze.grid[0]) - 1):
-                return intersection_count    
+            if track_intersection_count and (maze.grid[x][y] == 1 or  x <= 0 or x >= len(maze.grid) - 1 or y <= 0 or y >= len(maze.grid[0]) - 1):
+                return (path, intersection_count)
+            
+            path.append((x, y))
             intersection_count += 1
         else:
             grid = maze.grid
@@ -151,17 +159,33 @@ def generate_solution(maze: Maze, intersections, individual, track_intersection_
             
             path.append((x, y))
     
-    return path if track_intersection_count == False else intersection_count
+    return path if track_intersection_count == False else (path, intersection_count)
+
+
+def distance_between(point1, point2):
+    """Calculate the manhattan distance between two points."""
+
+    return abs(point2[0] - point1[0]) + abs(point2[1] - point1[1])
+
+
+def are_equal(ind1, ind2):
+    for i in range(len(ind1)):
+        if ind1[i] != ind2[i]:
+            return False
+    
+    return True
 
 
 def log_generation_data(maze: Maze, intersections, population: list[str], population_eval: list[int], generation_num: int):
     print(f'--- Generation #{generation_num} Statistics ---')
     print('\tBest individual: ',
           ''.join(population[population_eval.index(max(population_eval))]))
-    solution = generate_solution(maze, intersections, population[population_eval.index(max(population_eval))])
+    print('\tBest individual aptitude: ', max(population_eval))
+    solution_from_start = generate_solution(maze, intersections, population[population_eval.index(max(population_eval))])
+    solution_from_end = generate_solution(maze, intersections, population[population_eval.index(max(population_eval))], start_from=maze.end)
+    solution = solution_from_start + solution_from_end
     print('\tRoute followed: ')
     print_maze_solution(maze, solution)
-    print('\tBest individual aptitude: ', max(population_eval))
     print('\tAverage aptitude: ', mean(population_eval))
     print('\n')
 
@@ -235,7 +259,7 @@ def mutate(population: list[str]):
         population[individual_idx] = wrap(''.join(new_individual), 2)
 
 
-def evaluate(maze, population, intersections):
+def evaluate(maze: Maze, population, intersections):
     aptitudes = []
     for individual in population:
         ind_aptitude = 0
@@ -244,7 +268,13 @@ def evaluate(maze, population, intersections):
             if maze.grid[x][y] == 0:
                 ind_aptitude += 1
     
-        ind_aptitude += generate_solution(maze, intersections, individual, True)
+        path_from_start, intersection_count_from_start = generate_solution(maze, intersections, individual, True)
+        ind_aptitude += (intersection_count_from_start) * 2
+
+        path_from_end, intersection_count_from_end = generate_solution(maze, intersections, individual, True, maze.end)
+        ind_aptitude += (intersection_count_from_end) * 3
+
+        ind_aptitude -= (distance_between(path_from_start[-1], path_from_end[-1])) / 2
 
         aptitudes.append(ind_aptitude)
     
@@ -268,14 +298,23 @@ def genetic(maze: list[list[int]], intersections: list[tuple[int, int]]):
         population.append(individual_list)
 
     population_eval = evaluate(maze, population, intersections)
+    best_ind = population[population_eval.index(max(population_eval))]
+    best_repeat = 0
 
     log_generation_data(maze, intersections, population, population_eval, generation_num)
 
-    while not is_convergent(population):
+    while not is_convergent(population) or best_repeat > 15:
         population = select(population, population_eval)
         reproduce(population)
         mutate(population)
         population_eval = evaluate(maze, population, intersections)
+
+        new_best = population[population_eval.index(max(population_eval))]
+        if are_equal(''.join(best_ind), ''.join(new_best)):
+            best_repeat += 1
+        else:
+            best_ind = new_best
+            best_repeat = 0
 
         generation_num += 1
         log_generation_data(maze, intersections, population, population_eval, generation_num)
@@ -295,5 +334,5 @@ if __name__ == '__main__':
     print_maze_grid(maze)
     print('\n')
     
-    print(genetic(maze, intersections))
+    genetic(maze, intersections)
     
