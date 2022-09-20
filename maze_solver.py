@@ -266,13 +266,13 @@ def evaluate(maze: Maze, population, intersections):
         for decision_idx in range(len(individual)):
             x, y = move(intersections[decision_idx], individual[decision_idx])
             if maze.grid[x][y] == 0:
-                ind_aptitude += 1
+                ind_aptitude += 0.5
     
         path_from_start, intersection_count_from_start = generate_solution(maze, intersections, individual, True)
-        ind_aptitude += (intersection_count_from_start) * 2
+        ind_aptitude += (intersection_count_from_start) * 10
 
         path_from_end, intersection_count_from_end = generate_solution(maze, intersections, individual, True, maze.end)
-        ind_aptitude += (intersection_count_from_end) * 3
+        ind_aptitude += (intersection_count_from_end) * 10
 
         ind_aptitude -= (distance_between(path_from_start[-1], path_from_end[-1])) / 2
 
@@ -303,7 +303,7 @@ def genetic(maze: list[list[int]], intersections: list[tuple[int, int]]):
 
     log_generation_data(maze, intersections, population, population_eval, generation_num)
 
-    while not is_convergent(population) or best_repeat > 15:
+    while not is_convergent(population) or best_repeat > 30:
         population = select(population, population_eval)
         reproduce(population)
         mutate(population)
