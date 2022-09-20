@@ -1,39 +1,54 @@
+import random
+from statistics import mean
+from textwrap import wrap
 from mazelib import Maze
 from mazelib.generate.Prims import Prims
 
 mock_maze_grid = [
-    ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
-    ['#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'],
-    ['#', ' ', '#', '#', '#', '#', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', '#', '#'],
-    ['#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', ' ', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' '],
-    ['#', '#', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', '#', '#'],
-    ['#', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', ' ', '#', '#', '#', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'],
-    ['#', '#', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', ' ', '#', '#', '#', '#', '#', ' ', '#'],
-    ['#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', '#', ' ', ' ', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#'],
-    ['#', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'],
-    ['#', '#', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', '#', '#', '#', '#', ' ', '#'],
-    ['#', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', '#', '#', '#', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#'],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#'],
-    ['#', ' ', '#', '#', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', '#', '#'],
-    ['#', ' ', '#', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', '#', ' ', ' ', ' ', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', '#', '#', '#', ' ', '#', '#', '#', '#', '#', '#', '#', ' ', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', ' ', '#'],
-    ['#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'],
-    ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1],
+    [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
+
+
+def sum_immediate_neighbors(maze, x, y):
+    total = 0
+
+    total += maze[x - 1][y]  # top neighbor
+    total += maze[x][y - 1]  # left neighbor
+    total += maze[x][y + 1]  # right neighbor
+    total += maze[x + 1][y]  # bottom neighbor
+
+    return total
+
 
 def generate_maze(height, width):
     maze = Maze()
@@ -44,13 +59,241 @@ def generate_maze(height, width):
     return maze
 
 
-if __name__ == '__main__':
-    # maze_width = 27
-    # maze_height = 11
-
-    # generate_maze(maze_height, maze_width)
+def generate_mock_maze():
     maze = Maze()
     maze.start = (23, 0)
     maze.end = (5, 30)
     maze.grid = mock_maze_grid
-    print(maze)
+    return maze
+
+
+def get_maze_intersections(grid: list[list[int]]):
+    intersections = []
+    for row in range(1, len(grid) - 1):
+        for col in range(1, len(grid[row]) - 1):
+            if grid[row][col] == 0 and sum_immediate_neighbors(grid, row, col) < 2:
+                intersections.append((row, col))
+
+    return intersections
+
+
+def print_maze_grid(maze: Maze):
+    grid = maze.grid
+    for row in range(len(grid)):
+        for col in range(len(grid[row])):
+            if (row, col) == maze.start:
+                print('S', end=' ')
+                continue
+
+            if (row, col) == maze.end:
+                print('E', end=' ')
+                continue
+                
+            print('#', end=' ') if grid[row][col] else print(' ', end=' ')
+        
+        print('')
+            
+
+def print_maze_solution(maze: Maze, solution):
+    grid = maze.grid
+    for row in range(len(grid)):
+        for col in range(len(grid[row])):
+            if (row, col) == maze.start:
+                print('S', end=' ')
+                continue
+
+            if (row, col) == maze.end:
+                print('E', end=' ')
+                continue
+
+            if (row, col) in solution:
+                print('+', end=' ')
+                continue
+                
+            print('#', end=' ') if grid[row][col] else print(' ', end=' ')
+        
+        print('')
+
+
+def generate_solution(maze: Maze, intersections, individual, track_intersection_count=False):
+    path = []
+    intersection_count = 0
+    x, y = maze.start
+
+    if x == 0:
+        x += 1
+    else:
+        y += 1
+
+    path.append((x, y))
+
+    while sum_immediate_neighbors(maze.grid, x, y) < 3:
+        if (x, y) in intersections:
+            decision_idx = intersections.index((x, y))
+            x, y = move((x, y), individual[decision_idx])
+            path.append((x, y))
+            
+            if track_intersection_count and (x <= 0 or x >= len(maze.grid) - 1 or y <= 0 or y >= len(maze.grid[0]) - 1):
+                return intersection_count    
+            intersection_count += 1
+        else:
+            grid = maze.grid
+            if grid[x - 1][y] == 0 and (x - 1, y) not in path and x - 1 > 0:
+                x -= 1
+            elif grid[x + 1][y] == 0 and (x + 1, y) not in path and x + 1 < len(grid) - 1:
+                x += 1
+            elif grid[x][y + 1] == 0 and (x, y + 1) not in path and y + 1 < len(grid[0]) - 1:
+                y += 1
+            elif grid[x][y - 1] == 0 and (x, y - 1) not in path and y - 1 > 0:
+                y -= 1
+            else:
+                break
+            
+            path.append((x, y))
+    
+    return path if track_intersection_count == False else intersection_count
+
+
+def log_generation_data(maze: Maze, intersections, population: list[str], population_eval: list[int], generation_num: int):
+    print(f'--- Generation #{generation_num} Statistics ---')
+    print('\tBest individual: ',
+          ''.join(population[population_eval.index(max(population_eval))]))
+    solution = generate_solution(maze, intersections, population[population_eval.index(max(population_eval))])
+    print('\tRoute followed: ')
+    print_maze_solution(maze, solution)
+    print('\tBest individual aptitude: ', max(population_eval))
+    print('\tAverage aptitude: ', mean(population_eval))
+    print('\n')
+
+
+def move(from_coords: tuple[int, int], direction: str):
+    # up
+    if direction == '00':
+        return (from_coords[0] - 1, from_coords[1]) 
+
+    # down
+    if direction == '01':
+        return (from_coords[0] + 1, from_coords[1]) 
+    
+    # right
+    if direction == '10':
+        return (from_coords[0], from_coords[1] + 1) 
+    
+    # right
+    if direction == '11':
+        return (from_coords[0], from_coords[1] - 1) 
+
+
+def select(population: list[str], population_eval: list[int]):
+    total = sum(population_eval)
+    weights = [population_eval[i] / total for i in range(len(population))]
+
+    return random.choices(population, weights, k=len(population))
+
+
+def reproduce(population: list[str]):
+    x = 0
+    y = 1
+    while y < len(population):
+        ind1 = ''.join(population[x])
+        ind2 = ''.join(population[y])
+
+        cross = random.randint(1, len(ind1) - 1)
+
+        offspring1 = ind1[:cross] + ind2[cross:]
+        offspring2 = ind2[:cross] + ind1[cross:]
+
+        population[x] = wrap(offspring1, 2)
+        population[y] = wrap(offspring2, 2)
+
+        x += 2
+        y += 2
+
+
+def is_convergent(population: list[str]):
+    model = population[0]
+    individual_idx = 1
+
+    while individual_idx < len(population):
+        for char_idx in range(len(model)):
+            individual = population[individual_idx]
+            if model[char_idx] != individual[char_idx]:
+                return False
+
+        individual_idx += 1
+
+    return True
+
+
+def mutate(population: list[str]):
+    while random.randint(0, 1):
+        individual_idx = random.randint(0, len(population) - 1)
+        gen_idx = random.randint(0, len(population[individual_idx]) - 1)
+
+        new_individual = list(''.join(population[individual_idx]))
+        new_individual[gen_idx] = '0' if new_individual[gen_idx] == '1' else '1'
+        population[individual_idx] = wrap(''.join(new_individual), 2)
+
+
+def evaluate(maze, population, intersections):
+    aptitudes = []
+    for individual in population:
+        ind_aptitude = 0
+        for decision_idx in range(len(individual)):
+            x, y = move(intersections[decision_idx], individual[decision_idx])
+            if maze.grid[x][y] == 0:
+                ind_aptitude += 1
+    
+        ind_aptitude += generate_solution(maze, intersections, individual, True)
+
+        aptitudes.append(ind_aptitude)
+    
+    return aptitudes
+
+
+def genetic(maze: list[list[int]], intersections: list[tuple[int, int]]):
+    N = len(intersections) * 2
+    L = len(intersections)
+
+    print(f'* Performing algorithm with {N} individuals of {L * 2} bits.')
+
+    generation_num = 1
+    population = []
+
+    for _ in range(N):
+        individual_list = []
+        for _ in range(L):
+            individual_list.append(f'{random.getrandbits(2):0{2}b}')
+
+        population.append(individual_list)
+
+    population_eval = evaluate(maze, population, intersections)
+
+    log_generation_data(maze, intersections, population, population_eval, generation_num)
+
+    while not is_convergent(population):
+        population = select(population, population_eval)
+        reproduce(population)
+        mutate(population)
+        population_eval = evaluate(maze, population, intersections)
+
+        generation_num += 1
+        log_generation_data(maze, intersections, population, population_eval, generation_num)
+
+    return population
+
+
+if __name__ == '__main__':
+    # maze_width = 27
+    # maze_height = 11
+    # generate_maze(maze_height, maze_width)
+
+    maze = generate_mock_maze()
+    intersections = get_maze_intersections(maze.grid)
+
+    print('--- Maze generated ---')
+    print_maze_grid(maze)
+    print('\n')
+    
+    print(genetic(maze, intersections))
+    
