@@ -203,14 +203,41 @@ def move(from_coords: tuple[int, int], direction: str):
     if direction == '10':
         return (from_coords[0], from_coords[1] + 1) 
     
-    # right
+    # left
     if direction == '11':
         return (from_coords[0], from_coords[1] - 1) 
 
 
+def is_convergent(population: list[list[str]]):
+    model = population[0]
+    individual_idx = 1
+
+    while individual_idx < len(population):
+        for char_idx in range(len(model)):
+            individual = population[individual_idx]
+            if model[char_idx] != individual[char_idx]:
+                return False
+
+        individual_idx += 1
+
+    return True
+
+
 def select(population: list[str], population_eval: list[int]):
     total = sum(population_eval)
-    weights = [population_eval[i] / total for i in range(len(population))]
+    max_weight_pct = 0.65
+    min_weight_pct = 0.01
+
+    weights = []
+    for i in range(len(population)):
+        weight = population_eval[i] / total
+        if weight > max_weight_pct:
+            weight = max_weight_pct
+        
+        if weight < min_weight_pct:
+            weight = min_weight_pct
+
+        weights.append(weight)
 
     return random.choices(population, weights, k=len(population))
 
@@ -234,23 +261,8 @@ def reproduce(population: list[str]):
         y += 2
 
 
-def is_convergent(population: list[str]):
-    model = population[0]
-    individual_idx = 1
-
-    while individual_idx < len(population):
-        for char_idx in range(len(model)):
-            individual = population[individual_idx]
-            if model[char_idx] != individual[char_idx]:
-                return False
-
-        individual_idx += 1
-
-    return True
-
-
 def mutate(population: list[str]):
-    while random.randint(0, 1):
+    while random.random() > 0.99:
         individual_idx = random.randint(0, len(population) - 1)
         gen_idx = random.randint(0, len(population[individual_idx]) - 1)
 
@@ -274,7 +286,9 @@ def evaluate(maze: Maze, population, intersections):
         path_from_end, intersection_count_from_end = generate_solution(maze, intersections, individual, True, maze.end)
         ind_aptitude += (intersection_count_from_end) * 10
 
-        ind_aptitude -= (distance_between(path_from_start[-1], path_from_end[-1])) / 2
+        ind_aptitude -= (distance_between(path_from_start[-1], path_from_end[-1])) / 10
+
+
 
         aptitudes.append(ind_aptitude)
     
@@ -319,15 +333,25 @@ def genetic(maze: list[list[int]], intersections: list[tuple[int, int]]):
         generation_num += 1
         log_generation_data(maze, intersections, population, population_eval, generation_num)
 
+    if is_convergent(population):
+        print('\tThe algorithm finished because the population reached convergence.')
+    elif best_repeat > 100:
+        print('\tThe algorithm finished because the best individual repeated 100 times.')
+        
+
     return population
 
 
 if __name__ == '__main__':
-    # maze_width = 27
-    # maze_height = 11
-    # generate_maze(maze_height, maze_width)
+    mock_maze = input('Use default maze? (Y/n): ')
 
-    maze = generate_mock_maze()
+    if mock_maze.casefold() == 'y':
+        maze = generate_mock_maze()
+    else:
+        maze_width = 27
+        maze_height = 11
+        maze = generate_maze(maze_height, maze_width)
+
     intersections = get_maze_intersections(maze.grid)
 
     print('--- Maze generated ---')
